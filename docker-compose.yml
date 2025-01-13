@@ -45,7 +45,7 @@ services:
       STATUS_STORAGE_TOPIC: connect-statuses
 
   spark-master:
-    image: apache/spark-py:v3.5.0-hadoop3-scala2.12
+    image: apache/spark:3.5.0-scala2.12-java11-python3-r-ubuntu
     container_name: spark-master
     environment:
       SPARK_MODE: master
