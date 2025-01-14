@@ -20,8 +20,7 @@ def create_database(force_new=True):
         try: 
             cur.execute("DROP DATABASE authdb;")
         except psycopg2.errors.InvalidCatalogName:
-            print("não limpamos???")
-            pass
+            print("Ou você está executando isso pela primeira vez ou o FORCE_NEW não funcionou")
 
     try:
         cur.execute("CREATE DATABASE authdb;")
