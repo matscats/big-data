@@ -6,8 +6,11 @@
     "database.port": "5432",
     "database.user": "user",
     "database.password": "password",
-    "database.dbname": "exampledb",
-    "database.server.name": "postgres_server",
-    "plugin.name": "pgoutput"
+    "database.dbname": "authdb",
+    "database.server.name": "postgres",
+    "plugin.name": "pgoutput",
+    "topic.prefix": "novas-integracoes",
+    "table.whitelist": "INTEGRACOES",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter"
   }
 }

@@ -1,0 +1,2 @@
+echo APERTE CTRL+C PARA SAIR, CONSOLE CONSUMER DO CONTAINER DO KAFKA
+docker compose exec kafka ./kafka-console-consumer.sh --topic novas-integracoes.public.integracoes --from-beginning --bootstrap-server localhost:9092
