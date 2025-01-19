@@ -18,19 +18,25 @@ services:
       - "5432:5432"
 
   mongodb:
-    image: mongo:6.0
-    container_name: mongodb
+    image: mongo:latest
+    container_name: mongodb_container
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password123
     ports:
       - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+
+volumes:
+  mongo-data:
+    driver: local
+  mongo-config:
+    driver: local
 
   spark-master:
     image: apache/spark:3.5.0-scala2.12-java11-python3-r-ubuntu
     container_name: spark-master
     environment:
       SPARK_MODE: master
-
-  airflow:
-    image: apache/airflow:2.7.0-python3.10
-    container_name: airflow_webserver
-    ports:
-      - "8080:8080"
