@@ -1,42 +1,77 @@
 services:
-  kafka:
-    image: apache/kafka:3.7.0-rc2
-    container_name: kafka
-    ports:
-      - "9092:9092"
-      - "8083:8083"
-
   postgres:
-    image: postgres:15
+    build: ./postgres
     container_name: postgres
-    hostname: postgres
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: postgres
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: musicdb
     ports:
       - "5432:5432"
+    networks:
+      - app_network
 
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb_container
+  kafka:
+    build: ./kafka
+    container_name: kafka
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password123
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_PROCESS_ROLES: broker
     ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-      - mongo-config:/data/configdb
+      - "9092:9092"
+    networks:
+      - app_network
 
-volumes:
-  mongo-data:
-    driver: local
-  mongo-config:
-    driver: local
+  debezium:
+    build: ./debezium
+    container_name: debezium
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID_CONFIG: 1
+      CONFIG_STORAGE_TOPIC: debezium_configs
+      OFFSET_STORAGE_TOPIC: debezium_offsets
+      STATUS_STORAGE_TOPIC: debezium_statuses
+    ports:
+      - "8083:8083"
+    depends_on:
+      - kafka
+    networks:
+      - app_network
 
   spark-master:
-    image: apache/spark:3.5.0-scala2.12-java11-python3-r-ubuntu
+    build: ./spark-master
     container_name: spark-master
     environment:
       SPARK_MODE: master
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+    depends_on:
+      - kafka
+    networks:
+      - app_network
+
+  spark-worker:
+    build: ./spark-worker
+    container_name: spark-worker
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+    depends_on:
+      - spark-master
+    networks:
+      - app_network
+
+  mongodb:
+    build: ./mongodb
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - app_network
+
+networks:
+  app_network:
