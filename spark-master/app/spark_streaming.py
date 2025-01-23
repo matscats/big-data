@@ -3,15 +3,16 @@ from pyspark.sql.functions import to_timestamp, col
 # Criar sessão Spark com suporte ao Kafka e MongoDB.
 spark = (
     SparkSession.builder.appName("MusicStreamingAnalytics")
-    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4")
-    .config("spark.mongodb.output.uri", "mongodb://mongodb/musicdb.analytics")
+    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4,org.mongodb.spark:mongo-spark-connector_2.12:10.4.0")
+    .config("spark.mongodb.output.uri", "mongodb://mongodb:27017/musicdb.analytics")
+    .config("spark.mongodb.write.connection.uri", f"mongodb://mongodb:27017/musicdb.analytics")
     .getOrCreate()
 )
 
 # Configurar leitura do Kafka.
 df = (
     spark.readStream.format("kafka")
-    .option("bootstrap.servers", "kafka:9092")
+    .option("kafka.bootstrap.servers", "localhost:9092")
     .option("subscribe", "musicdb-server.public.music")
     .option("startingOffsets", "earliest")
     .load()
@@ -41,20 +42,26 @@ top_artists = music_df.groupBy("artista").count().orderBy("count", ascending=Fal
 def write_to_mongo(df, epoch_id):
     df.write.format("mongo").mode("append").save()
 
-
-#genre_stats.writeStream.outputMode("update").foreachBatch(write_to_mongo).start()
-
 print(80*"-")
 (genre_stats.writeStream 
-    .outputMode("update") 
+    .outputMode("complete") 
+    .format("console")
+    .option("truncate", False)
+    .start())
+(user_listening_time.writeStream
+    .outputMode("complete")
+    .format("console")
+    .option("truncate", False)
+    .start())
+(top_artists.writeStream
+    .outputMode("complete")
     .format("console")
     .option("truncate", False)
     .start())
 print(80*"-")
-#exit(0)
 
-#user_listening_time.writeStream.outputMode("update").foreachBatch(write_to_mongo).start()
-#top_artists.writeStream.outputMode("complete").foreachBatch(write_to_mongo).start()
-
+genre_stats.writeStream.outputMode("update").foreachBatch(write_to_mongo).start()
+user_listening_time.writeStream.outputMode("update").foreachBatch(write_to_mongo).start()
+top_artists.writeStream.outputMode("complete").foreachBatch(write_to_mongo).start()
 
 spark.streams.awaitAnyTermination()

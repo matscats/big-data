@@ -2,9 +2,11 @@
 #### Passos:
 - execute `docker compose exec postgres sh -c 'echo wal_level = logical >> /var/lib/postgresql/data/postgresql.conf'` para permitir a conexão do debezium ao postgres;
 - reinicie o container do postgres;
-- execute `setup_kafka.sh` a partir da pasta `scripts/setup/`;
-- execute `setup_debezium.sh` a partir da pasta `scripts/setup/`;
-[setup postgres+debezium+kafka pronto]
+- execute `start_kafka.sh` a partir da pasta `spark-master/`;
+- execute `submit_streaming_job.sh` partir da pasta `spark-master/`
+[setup postgres>debezium>kafka>spark pronto]
 
-#### Verificação postgres+kafka+debezium
-deixe o `console_consumer.sh` executando e insira dados pelo shell do postgres (`container_psql.sh` começa uma sessão iterativa do psql lá)
+#### Verificações
+deixe o `console_consumer.sh` executando e insira dados pelo shell do postgres (`container_psql.sh` começa uma sessão iterativa do psql lá), o consumer deve mostrar todas as mensagens da fila desde o início,
+que por sua vez devem ser todos os dados inseridos no kafka.  (testa a interação postgres>debezium>kafka)  
+O spark_streaming.py está alterado para enviar a sua saída pelo console, sua execução (simplificada no comando submit_streaming_job.sh) deve refletir os dados da fila do kafka. (testa a integração kafka>spark)
