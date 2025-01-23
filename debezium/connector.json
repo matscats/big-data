@@ -7,8 +7,10 @@
     "database.user": "admin",
     "database.password": "admin",
     "database.dbname": "musicdb",
-    "table.include.list": "public.music",
-    "database.server.name": "musicdb_server",
-    "plugin.name": "pgoutput"
+    "database.server.name": "postgres",
+    "plugin.name": "pgoutput",
+    "topic.prefix": "musicdb-server",
+    "table.whitelist": "music",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter"
   }
 }

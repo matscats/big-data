@@ -1,0 +1,10 @@
+### Primeira execução (docker compose up), pós criação dos containeres
+#### Passos:
+- execute `docker compose exec postgres sh -c 'echo wal_level = logical >> /var/lib/postgresql/data/postgresql.conf'` para permitir a conexão do debezium ao postgres;
+- reinicie o container do postgres;
+- execute `setup_kafka.sh` a partir da pasta `scripts/setup/`;
+- execute `setup_debezium.sh` a partir da pasta `scripts/setup/`;
+[setup postgres+debezium+kafka pronto]
+
+#### Verificação postgres+kafka+debezium
+deixe o `console_consumer.sh` executando e insira dados pelo shell do postgres (`container_psql.sh` começa uma sessão iterativa do psql lá)
