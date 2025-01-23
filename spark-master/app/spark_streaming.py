@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import to_timestamp, current_timestamp
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
 
 # Criar sessão Spark com suporte ao Kafka e MongoDB.
 spark = (
@@ -25,14 +26,16 @@ df = (
     .load()
 )
 
-schema = """
-id INT,
-usuario STRING,
-nome STRING,
-artista STRING,
-duracao INT,
-genero STRING
-"""
+schema = StructType(
+    [
+        StructField("id", IntegerType(), True),
+        StructField("usuario", StringType(), True),
+        StructField("nome", StringType(), True),
+        StructField("artista", StringType(), True),
+        StructField("duracao", IntegerType(), True),
+        StructField("genero", StringType(), True),
+    ]
+)
 
 music_df = (
     df.selectExpr("CAST(value AS STRING) as json_data")
