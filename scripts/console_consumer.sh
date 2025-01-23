@@ -1,2 +1,2 @@
 echo APERTE CTRL+C PARA SAIR, CONSOLE CONSUMER DO CONTAINER DO KAFKA
-docker compose exec kafka ./opt/kafka/bin/kafka-console-consumer.sh --topic musicdb-server.public.music --from-beginning --bootstrap-server localhost:9092
+docker compose exec kafka ./opt/kafka/bin/kafka-console-consumer.sh --topic musicdb-server.public.music --from-beginning --bootstrap-server kafka:9092
