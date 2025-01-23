@@ -12,34 +12,11 @@ services:
       - app_network
 
   kafka:
-    build: ./kafka
+    image: apache/kafka:3.7.0-rc2
     container_name: kafka
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_PROCESS_ROLES: broker
     ports:
       - "9092:9092"
-    networks:
-      - app_network
-
-  debezium:
-    build: ./debezium
-    container_name: debezium
-    environment:
-      BOOTSTRAP_SERVERS: kafka:9092
-      GROUP_ID_CONFIG: 1
-      CONFIG_STORAGE_TOPIC: debezium_configs
-      OFFSET_STORAGE_TOPIC: debezium_offsets
-      STATUS_STORAGE_TOPIC: debezium_statuses
-    ports:
       - "8083:8083"
-    depends_on:
-      - kafka
-    networks:
-      - app_network
 
   spark-master:
     build: ./spark-master
