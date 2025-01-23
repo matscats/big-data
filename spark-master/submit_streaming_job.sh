@@ -1,0 +1,1 @@
+docker exec spark-master spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4,org.mongodb.spark:mongo-spark-connector_2.12:10.4.0 /opt/spark-apps/spark_streamingb.py

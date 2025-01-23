@@ -12,23 +12,6 @@ services:
     networks:
       - app_network
 
-  kafka:
-    image: apache/kafka:3.7.0-rc2
-    container_name: kafka
-    hostname: kafka
-    ports:
-      - "9092:9092"
-      - "8083:8083"
-#    environment:
-#      KAFKA_NODE_ID: 1
-#      KAFKA_PROCESS_ROLES: broker,controller
-#      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@localhost:9093"
-#      KAFKA_LISTENERS: PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093
-#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-#      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-    networks:
-      - app_network
-
   spark-master:
     build: ./spark-master
     container_name: spark-master
@@ -38,8 +21,7 @@ services:
     ports:
       - "7077:7077"
       - "8080:8080"
-    depends_on:
-      - kafka
+      - "8083:8083"
     networks:
       - app_network
 
@@ -52,8 +34,8 @@ services:
       SPARK_MASTER_URL: spark://spark-master:7077
     depends_on:
       - spark-master
-#    networks:
-#      - app_network
+    networks:
+      - app_network
 
   mongodb:
     build: ./mongodb
