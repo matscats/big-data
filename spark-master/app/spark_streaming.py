@@ -2,8 +2,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
-# Criar sessão Spark com suporte ao Kafka e MongoDB.
-spark = (
+
+""" spark = (
     SparkSession.builder.appName("MusicStreamingAnalytics")
     .config(
         "spark.jars.packages",
@@ -15,9 +15,17 @@ spark = (
         f"mongodb://mongodb:27017/musicdb.analytics",
     )
     .getOrCreate()
+) """
+
+spark = (
+    SparkSession.builder.appName("MusicStreamingAnalytics")
+    .config(
+        "spark.jars.packages",
+        "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4,org.mongodb.spark:mongo-spark-connector_2.12:10.4.0",
+    )
+    .getOrCreate()
 )
 
-# Configurar leitura do Kafka.
 df = (
     spark.readStream.format("kafka")
     .option("kafka.bootstrap.servers", "localhost:9092")
@@ -26,25 +34,38 @@ df = (
     .load()
 )
 
+# Definir o schema dos dados do Kafka
 schema = StructType(
     [
-        StructField("id", IntegerType(), True),
-        StructField("usuario", StringType(), True),
-        StructField("nome", StringType(), True),
-        StructField("artista", StringType(), True),
-        StructField("duracao", IntegerType(), True),
-        StructField("genero", StringType(), True),
+        StructField(
+            "payload",
+            StructType(
+                [
+                    StructField(
+                        "after",
+                        StructType(
+                            [
+                                StructField("id", IntegerType(), True),
+                                StructField("usuario", StringType(), True),
+                                StructField("nome", StringType(), True),
+                                StructField("artista", StringType(), True),
+                                StructField("duracao", IntegerType(), True),
+                                StructField("genero", StringType(), True),
+                            ]
+                        ),
+                        True,
+                    )
+                ]
+            ),
+            True,
+        )
     ]
 )
 
-music_df = (
-    df.selectExpr("CAST(value AS STRING) as json_data")
-    .selectExpr(f"from_json(json_data, '{schema}') as data")
-    .select("data.*")
-    .withColumn("timestamp", to_timestamp(current_timestamp()))
-    .withWatermark("timestamp", "10 minutes")
-)
-
+# Converter os dados do Kafka de binário para JSON e extrair os campos desejados
+music_df = df.select(
+    from_json(col("value").cast("string"), schema).alias("data")
+).select("data.payload.after.*")
 
 genre_stats = music_df.groupBy("genero").count()
 user_listening_time = music_df.groupBy("usuario").sum("duracao")
