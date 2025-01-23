@@ -6,7 +6,11 @@
 - execute `submit_streaming_job.sh` partir da pasta `spark-master/`
 [setup postgres>debezium>kafka>spark pronto]
 
-#### Verificações
+### Demais execuções:
+- execute `start_kafka.sh` a partir da pasta `spark-master/`;
+- execute `submit_streaming_job.sh` partir da pasta `spark-master/`
+
+### Verificações
 deixe o `console_consumer.sh` executando e insira dados pelo shell do postgres (`container_psql.sh` começa uma sessão iterativa do psql lá), o consumer deve mostrar todas as mensagens da fila desde o início,
 que por sua vez devem ser todos os dados inseridos no kafka.  (testa a interação postgres>debezium>kafka)  
 O spark_streaming.py está alterado para enviar a sua saída pelo console, sua execução (simplificada no comando submit_streaming_job.sh) deve refletir os dados da fila do kafka. (testa a integração kafka>spark)
