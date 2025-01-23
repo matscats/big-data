@@ -60,8 +60,8 @@ print(80*"-")
     .start())
 print(80*"-")
 
-genre_stats.writeStream.outputMode("update").foreachBatch(write_to_mongo).start()
-user_listening_time.writeStream.outputMode("update").foreachBatch(write_to_mongo).start()
-top_artists.writeStream.outputMode("complete").foreachBatch(write_to_mongo).start()
+#genre_stats.writeStream.outputMode("update").foreachBatch(write_to_mongo).start()
+#user_listening_time.writeStream.outputMode("update").foreachBatch(write_to_mongo).start()
+#top_artists.writeStream.outputMode("complete").foreachBatch(write_to_mongo).start()
 
 spark.streams.awaitAnyTermination()
