@@ -46,5 +46,56 @@ services:
     networks:
       - app_network
 
+  airflow-db:
+    image: postgres
+    container_name: airflow-db
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  airflow-webserver:
+    build: ./airflow
+    container_name: airflow-webserver
+    depends_on:
+      - airflow-db
+      - mongodb
+    environment:
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    ports:
+      - 8081:8080
+    command: >
+      bash -c "
+      airflow db upgrade &&
+      airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com &&
+      airflow webserver
+      "
+
+  airflow-scheduler:
+    build: ./airflow
+    container_name: airflow-scheduler
+    depends_on:
+      - airflow-db
+      - mongodb
+    environment:
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    command: >
+      bash -c "airflow db init && airflow scheduler"
+
 networks:
   app_network:
+
+volumes:
+  postgres-data:
+    driver: local
